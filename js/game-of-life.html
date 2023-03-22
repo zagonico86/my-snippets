@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Game of life</title>
+</head>
+
+<body>
+
+	<canvas id="game-of-life" width="500" height="500"></canvas><br />
+
+
+	<button onclick="startGame()">Start</button>
+	<button onclick="stopGame()">Stop</button>
+	<button onclick="resetGrid()">Reset</button><br />
+
+	<label for="interval">Interval:</label>
+	<input type="text" id="interval" name="interval" value="100" />
+	<button onclick="setDifferentInterval()">Set</button>
+
+	<br />
+	<button onclick="initGrid()">Initialize with 404</button>
+
+
+	<script>
+
+		const canvas = document.getElementById('game-of-life');
+		const ctx = canvas.getContext('2d');
+
+		const CELL_SIZE = 10; // Size of each grid cell in pixels
+		const GRID_WIDTH = canvas.width / CELL_SIZE;
+		const GRID_HEIGHT = canvas.height / CELL_SIZE;
+
+		// Initialize the game grid as a 2D array of cells
+		let grid = new Array(GRID_WIDTH).fill(null).map(() => new Array(GRID_HEIGHT).fill(false));
+		function drawGrid() {
+			ctx.strokeStyle = '#aaa'; // Grid line color
+			ctx.lineWidth = 0.5;
+
+			for (let x = 0; x <= canvas.width; x += CELL_SIZE) {
+				ctx.beginPath();
+				ctx.moveTo(x, 0);
+				ctx.lineTo(x, canvas.height);
+				ctx.stroke();
+			}
+
+			for (let y = 0; y <= canvas.height; y += CELL_SIZE) {
+				ctx.beginPath();
+				ctx.moveTo(0, y);
+				ctx.lineTo(canvas.width, y);
+				ctx.stroke();
+			}
+		}
+
+		function updateGrid() {
+			// Create a copy of the current grid to store the new state
+			let newGrid = new Array(GRID_WIDTH).fill(null).map(() => new Array(GRID_HEIGHT).fill(false));
+
+			// Apply the Game of Life rules to each cell in the grid
+			for (let x = 0; x < GRID_WIDTH; x++) {
+				for (let y = 0; y < GRID_HEIGHT; y++) {
+					let neighbors = countNeighbors(x, y);
+
+					if (grid[x][y]) { // Cell is alive
+						if (neighbors < 2 || neighbors > 3) {
+							newGrid[x][y] = false; // Cell dies from underpopulation or overpopulation
+						} else {
+							newGrid[x][y] = true; // Cell survives
+						}
+					} else { // Cell is dead
+						if (neighbors === 3) {
+							newGrid[x][y] = true; // Cell is born from reproduction
+						}
+					}
+				}
+			}
+
+			// Replace the old grid with the new one
+			grid = newGrid;
+
+			// Draw the updated grid on the canvas
+			clearCanvas();
+			drawGrid();
+			drawCells();
+		}
+
+		function countNeighbors(x, y) {
+			let count = 0;
+
+			for (let i = -1; i <= 1; i++) {
+				for (let j = -1; j <= 1; j++) {
+					if (i === 0 && j === 0) continue; // Skip the current cell
+					let neighborX = x + i;
+					let neighborY = y + j;
+
+					// Check if the neighbor is within the grid bounds
+					if (neighborX >= 0 && neighborX < GRID_WIDTH && neighborY >= 0 && neighborY < GRID_HEIGHT) {
+						if (grid[neighborX][neighborY]) count++;
+					}
+				}
+			}
+
+			return count;
+		}
+
+		function drawCells() {
+			ctx.fillStyle = '#333'; // Cell color
+
+			for (let x = 0; x < GRID_WIDTH; x++) {
+				for (let y = 0; y < GRID_HEIGHT; y++) {
+					if (grid[x][y]) {
+						let cellX = x * CELL_SIZE;
+						let cellY = y * CELL_SIZE;
+						ctx.fillRect(cellX, cellY, CELL_SIZE, CELL_SIZE);
+					}
+				}
+			}
+		}
+
+		canvas.addEventListener('click', (event) => {
+			let rect = canvas.getBoundingClientRect();
+			let mouseX = event.clientX - rect.left;
+			let mouseY = event.clientY - rect.top;
+			let cellX = Math.floor(mouseX / CELL_SIZE);
+			let cellY = Math.floor(mouseY / CELL_SIZE);
+			grid[cellX][cellY] = !grid[cellX][cellY]; // Toggle the cell state
+			clearCanvas();
+			drawGrid();
+			drawCells();
+		});
+
+		function clearCanvas() {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+		}
+
+		let intervalId = null;
+		let gameInterval = 100; // Default game interval
+
+		function startGame() {
+			if (intervalId) return; // Game is already running
+			intervalId = setInterval(updateGrid, gameInterval); // Update the grid every 100 milliseconds
+		}
+
+		function stopGame() {
+			clearInterval(intervalId);
+			intervalId = null;
+		}
+
+		function resetGrid() {
+			for (let x = 0; x < GRID_WIDTH; x++) {
+				for (let y = 0; y < GRID_HEIGHT; y++) {
+					grid[x][y] = false;
+				}
+			}
+			clearCanvas();
+			drawGrid();
+		}
+
+		function setDifferentInterval() {
+			let intervalTextbox = document.getElementById('interval');
+			gameInterval = parseInt(intervalTextbox.value) || 100; // Use the value in the textbox or the default value if the value is not valid
+			if (intervalId) {
+				clearInterval(intervalId);
+				intervalId = setInterval(updateGrid, gameInterval);
+			}
+		}
+
+
+		function initGrid() {
+			let str = "404";
+			let x = Math.floor((GRID_WIDTH - str.length * 6) / 2);
+			let y = Math.floor((GRID_HEIGHT - 10) / 2);
+			for (let i = 0; i < str.length; i++) {
+				let char = str.charAt(i);
+				let index = CHAR_TO_INDEX[char];
+				if (index !== undefined) {
+					for (let j = 0; j < CHAR_GRID[index].length; j++) {
+						let row = CHAR_GRID[index][j];
+						for (let k = 0; k < row.length; k++) {
+							let cell = row[k];
+							grid[x + k][y + j] = cell;
+						}
+					}
+					x += 7;
+				}
+			}
+			clearCanvas();
+			drawGrid();
+			drawCells();
+		}
+
+
+
+		const CHAR_TO_INDEX = {
+			"0": 0,
+			"4": 1,
+			" ": 2 // Undefined character
+		};
+		const CHAR_WIDTH = {
+			"0": 6,
+			"4": 6,
+			" ": 6 // Undefined character
+		};
+
+		const CHAR_GRID = [
+			// 0
+			[
+				[0, 0, 1, 1, 0, 0],
+				[0, 1, 0, 0, 1, 0],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[0, 1, 0, 0, 1, 0],
+				[0, 0, 1, 1, 0, 0]
+			],
+			// 4
+			[
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 0, 0, 0, 0, 1],
+				[1, 1, 1, 1, 1, 1],
+				[0, 0, 0, 0, 0, 1],
+				[0, 0, 0, 0, 0, 1],
+				[0, 0, 0, 0, 0, 1],
+				[0, 0, 0, 0, 0, 1]
+			],
+			// space
+			[
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0],
+				[0, 0, 0, 0, 0, 0]
+			]
+		];
+
+
+	</script>
+
+</body>
+
+</html>
