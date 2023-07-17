@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="description" content="3d webcam">
+	<meta name="author" content="zagonico.com">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<title>3d webcam</title>
+	
+	<style>
+	h1 {
+	  margin: 0 0 24px 0;
+	}
+	select {
+	  width: 150px;
+	}
+	video {
+	  margin: 10px 0 0 0;
+	}
+	</style>
+
+</head>
+
+<body>
+
+<div id="container">
+<table>
+	<tr><td colspan="2">
+		<canvas id="canvas3d"></canvas>
+		<canvas id="canvas1" style="display:none"></canvas>
+		<canvas id="canvas2" style="display:none"></canvas>
+	</td></tr>
+	<tr>
+		<td>
+			Red/Green <input type="checkbox" id="colType"/> Orange/Blue 
+		</td>
+		<td>
+		<button id="recordButton" onclick="alert('coming soon...')">Record</button>
+		</td>
+	</tr>
+	<tr>
+	<td>
+		<div class="select">
+		<label for="videoSource">Video source: </label><select id="video1"></select>
+		</div>
+
+		<video id="video1" autoplay muted playsinline></video>
+	</td>
+	<td>
+		<div class="select">
+		<label for="videoSource">Video source: </label><select id="video2"></select>
+		</div>
+
+		<video id="video2" autoplay muted playsinline></video>
+	</td>
+	</tr>
+</table>
+
+<script async src="js/3d-webcam.js"></script>
+</div>
+
+</body>
+</html>
