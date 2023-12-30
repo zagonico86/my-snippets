@@ -25,6 +25,6 @@ Launch with:
 ./pi 2 10000
 ```
 
-See [https://www.zagonico.com/computing-1-million-digits-of-eulers-number/](https://www.zagonico.com/computing-1-million-digits-of-eulers-number/) for details.
+See [https://www.zagonico.com/one-million-digits-of-pi/](https://www.zagonico.com/one-million-digits-of-pi/) for details.
 
 
